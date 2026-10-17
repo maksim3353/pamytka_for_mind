@@ -1,3 +1,3 @@
 # pamyatka_for_mind
 
-A new Flutter project.
+Приложение для записи правил и их быстрого повторения

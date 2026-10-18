@@ -61,6 +61,7 @@ class RuleWidg extends StatelessWidget {
 
             SizedBox(height: size.height * 0.01),
             Wrap(
+              alignment: WrapAlignment.start,
               children: [
                 Text(
                   //description

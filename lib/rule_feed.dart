@@ -152,7 +152,7 @@ Future<void> _showCreateRuleDialog(BuildContext context) async {
                           class_int: int.tryParse(classCtrl.text) ?? 0,
                           description: descCtrl.text.trim(),
                         );
-                        await ruleProvider.AddNewRule(newRule);
+                        await ruleProvider.addRule(newRule);
                         if (dialogContext.mounted) {
                           Navigator.of(dialogContext).pop();
                         }
@@ -200,7 +200,7 @@ WidgetsBinding.instance.addPostFrameCallback((_){
 
 
   Future<void> _load() async {
-    await context.read<LocalRulesProvider>().RefreshRuleList();
+    await context.read<LocalRulesProvider>().load();
  
     setState(() {}); // ← вот это заставляет build перезапуститься
   }
@@ -211,7 +211,7 @@ WidgetsBinding.instance.addPostFrameCallback((_){
   @override
   Widget build(BuildContext context) {
     
-final Rule_List = context.watch<LocalRulesProvider>().Rule_List;
+final Rule_List = context.watch<LocalRulesProvider>().rules;
     final size = MediaQuery.of(context).size;
 
 

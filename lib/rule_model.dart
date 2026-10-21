@@ -1,25 +1,29 @@
-class rule {
-  int class_int = 0;
-  String subject = "subject";
-  String rule_name = "name";
-  String description = "description";
 
-  rule({
-    required this.description,
-    required this.class_int,
+class rule {
+
+  final String rule_name;
+  final String subject;
+  final int class_int;
+  final String description;
+
+  const rule({
+  
     required this.rule_name,
     required this.subject,
+    required this.class_int,
+    required this.description,
   });
 
-  factory rule.fromJson(Map<String, dynamic> json) {
-    return rule(
-      description: json["description"],
-      class_int: json["class_int"],
-      rule_name: json["rule_name"],
-      subject: json["subject"],
-    );
-  }
-    Map<String, dynamic> toJson() => {
+  factory rule.fromJson(Map<String, dynamic> j) => rule(
+      
+            
+        rule_name: j['rule_name']?.toString() ?? '',
+        subject: j['subject']?.toString() ?? '',
+        class_int: (j['class_int'] as num?)?.toInt() ?? 0,
+        description: j['description']?.toString() ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
         
         'rule_name': rule_name,
         'subject': subject,

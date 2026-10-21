@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pamyatka_for_mind/LocalRulesProvider.dart';
+import 'package:pamyatka_for_mind/Navigation.dart';
 import 'package:pamyatka_for_mind/rule_feed.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +20,6 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: RuleFeed());
+      home: NavBar());
   }
 }

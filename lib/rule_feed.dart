@@ -1,5 +1,7 @@
 
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pamyatka_for_mind/LocalRulesProvider.dart';
 import 'package:pamyatka_for_mind/rule_model.dart';
@@ -152,7 +154,14 @@ Future<void> _showCreateRuleDialog(BuildContext context) async {
                           class_int: int.tryParse(classCtrl.text) ?? 0,
                           description: descCtrl.text.trim(),
                         );
-                        await ruleProvider.addRule(newRule);
+                        try {
+                          print("AddNewRule - tapped");
+                         ruleProvider.addRule(newRule).timeout(const Duration(seconds: 2));
+                        } on TimeoutException {
+                           if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop();
+                        }
+                        }
                         if (dialogContext.mounted) {
                           Navigator.of(dialogContext).pop();
                         }

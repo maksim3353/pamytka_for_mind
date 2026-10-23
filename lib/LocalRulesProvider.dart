@@ -73,9 +73,16 @@ class LocalRulesProvider with ChangeNotifier {
 
     final gjse = await prefs.getString(_key);
 
-    final UnjsonD = (jsonDecode(gjse!) as List)
+final UnjsonD;
+
+   if (gjse != null) {
+
+     UnjsonD = (jsonDecode(gjse!) as List)
         .map((e) => rule.fromJson(e as Map<String, dynamic>))
         .toList();
+} else {
+UnjsonD = [];
+}
 
     UnjsonD.add(NewRule);
 

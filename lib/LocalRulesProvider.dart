@@ -7,15 +7,32 @@ class LocalRulesProvider with ChangeNotifier {
   static const _key = 'rule_string';
   static const _backupPrefix = 'rule_string_corrupted_';
 
-  List<rule> _rules = [];
+  List<rule> rules = [];
   bool _disposed = false;
   bool _isLoading = false;
   Object? _error;
   Future<void> _writeQueue = Future.value();
 
-  List<rule> get rules => List.unmodifiable(_rules);
   bool get isLoading => _isLoading;
   Object? get error => _error;
+
+
+
+
+
+
+
+
+void removeRule(rule rule) async {
+  rules.removeWhere((r) => r.rule_name == rule.rule_name); 
+  
+_safeNotify();
+ await ListSave();
+}
+
+
+
+
 
   @override
   void dispose() {
@@ -27,6 +44,10 @@ class LocalRulesProvider with ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+
+
+
+
   Future<void> load() async {
     _isLoading = true;
     _error = null;
@@ -35,22 +56,22 @@ class LocalRulesProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_key);
       if (raw == null || raw.isEmpty) {
-        _rules = [];
+        rules = [];
         return;
       }
 
       final decoded = jsonDecode(raw);
       
       if (decoded is! List) throw const FormatException('not a list');
-      _rules = decoded
+      rules = decoded
           .whereType<Map<String, dynamic>>()
           .map(rule.fromJson)
-          .toList(growable: false);
+          .toList();
     } catch (e, st) {
       _error = e;
       debugPrint('load rules failed: $e\n$st');
-      _rules = [];
-      // бэкап битых данных, чтобы не потерять
+      rules = [];
+    
       try {
         final prefs = await SharedPreferences.getInstance();
         final raw = prefs.getString(_key);
@@ -67,6 +88,9 @@ class LocalRulesProvider with ChangeNotifier {
       _safeNotify();
     }
   }
+
+
+
 
   Future<void> addRule(rule NewRule) async {
     final prefs = await SharedPreferences.getInstance();
@@ -94,4 +118,27 @@ UnjsonD = [];
     _safeNotify();
     load();
   }
+  
+
+ Future<void> ListSave() async {
+    final prefs = await SharedPreferences.getInstance();
+
+   
+
+
+
+  
+
+  
+
+    String newJs = jsonEncode(rules.map((rule) => rule.toJson()).toList());
+
+    final r = await prefs.setString(_key, newJs);
+    
+
+    _safeNotify();
+    load();
+  }
+  
+  
 }

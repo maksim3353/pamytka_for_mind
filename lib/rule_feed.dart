@@ -14,6 +14,9 @@ class RuleFeed extends StatefulWidget {
 }
 
 class _RuleFeed extends State<RuleFeed> {
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
   @override
   void initState() {
     super.initState();
@@ -22,48 +25,197 @@ class _RuleFeed extends State<RuleFeed> {
     });
   }
 
+  Future<bool> _confirmDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 45, 45, 45),
+          title: Text(
+            "Удалить правило?",
+            style: const TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            "Вы действительно хотите удалить это правило?",
+            style: const TextStyle(color: Color.fromARGB(200, 255, 255, 255)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(
+                "отмена",
+                style: const TextStyle(
+                  color: Color.fromARGB(180, 255, 255, 255),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text(
+                "удалить",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    return result ?? false;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     await context.read<LocalRulesProvider>().load();
+    if (!mounted) return;
+    setState(() {});
+  }
 
-    setState(() {}); // ← вот это заставляет build перезапуститься
+  bool _matches(rule rule, String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+
+    final dynamic r = rule;
+    final parts = <String>[];
+
+    try {
+      parts.add('${r.title}');
+    } catch (_) {}
+    try {
+      parts.add('${r.description}');
+    } catch (_) {}
+    try {
+      parts.add('${r.text}');
+    } catch (_) {}
+    try {
+      parts.add('${r.name}');
+    } catch (_) {}
+    try {
+      parts.add('${r.content}');
+    } catch (_) {}
+
+    return parts.join(' ').toLowerCase().contains(q);
   }
 
   @override
   Widget build(BuildContext context) {
     final Rule_List = context.watch<LocalRulesProvider>().rules;
+    final provider = context.read<LocalRulesProvider>();
     final size = MediaQuery.of(context).size;
+
+    final filteredRules = _query.trim().isEmpty
+        ? Rule_List
+        : Rule_List.where((rule) => _matches(rule, _query)).toList();
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 31, 31, 31),
-      body: Stack(
-        children: [
-          Rule_List.isEmpty
-              ? Center(
-                  child: Text(
-                    //subject
-                    "У вас не добавлены правила - +",
-                    style: TextStyle(
-                      fontSize: size.width * 0.055,
-                      fontWeight: FontWeight.w800,
-                      color: const Color.fromARGB(160, 255, 255, 255),
-                    ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                size.width * 0.02,
+                size.width * 0.02,
+                size.width * 0.02,
+                0,
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _query = value),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: size.width * 0.04,
+                ),
+                cursorColor: Colors.white,
+                decoration: InputDecoration(
+                  hintText: 'Поиск правил...',
+                  hintStyle: TextStyle(
+                    color: const Color.fromARGB(120, 255, 255, 255),
+                    fontSize: size.width * 0.04,
                   ),
-                )
-              : SafeArea(
-                  child: Padding(
-                    padding: EdgeInsetsGeometry.all(size.width * 0.02),
-                    child: ListView.builder(
-                      itemCount: Rule_List.length,
-                      itemBuilder: (context, index) {
-                        return RuleWidg(
-                          Rule_model: Rule_List[index],
-                          onTap: () {},
-                        );
-                      },
-                    ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color.fromARGB(160, 255, 255, 255),
+                  ),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(
+                            Icons.clear,
+                            color: Color.fromARGB(160, 255, 255, 255),
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _query = '');
+                          },
+                        ),
+                  filled: true,
+                  fillColor: const Color.fromARGB(255, 45, 45, 45),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: size.width * 0.03,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(size.width * 0.04),
+                    borderSide: BorderSide.none,
                   ),
                 ),
-        ],
+              ),
+            ),
+
+            Expanded(
+              child: Rule_List.isEmpty
+                  ? Center(
+                      child: Text(
+                        "У вас не добавлены правила  +",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: size.width * 0.055,
+                          fontWeight: FontWeight.w800,
+                          color: const Color.fromARGB(160, 255, 255, 255),
+                        ),
+                      ),
+                    )
+                  : filteredRules.isEmpty
+                  ? Center(
+                      child: Text(
+                        "Ничего не найдено",
+                        style: TextStyle(
+                          fontSize: size.width * 0.055,
+                          fontWeight: FontWeight.w700,
+                          color: const Color.fromARGB(160, 255, 255, 255),
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: EdgeInsets.all(size.width * 0.02),
+                      child: ListView.builder(
+                        itemCount: filteredRules.length,
+                        itemBuilder: (context, index) {
+                          return RuleWidg(
+                            Rule_model: filteredRules[index],
+                            onTap: () async {
+                              print("asasadddddddddddddddd,${DateTime.now().microsecond}");
+                              final iss = await _confirmDialog(context);
+
+                              if (!iss) return;
+
+                           provider.removeRule(Rule_List[index]);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

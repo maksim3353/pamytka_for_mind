@@ -16,15 +16,9 @@ class NewRuleScreen extends StatefulWidget {
 final valdator = (v) =>
     (v == null || v.trim().isEmpty) ? 'Обязательное поле' : null;
 
-
-
-
 const bg = Color(0xFF121212);
 const fieldBg = Color(0xFF1C1C1E);
 const divider = Color(0xFF2C2C2E);
-
-
-
 
 InputDecoration deco(String label) => InputDecoration(
   labelText: label,
@@ -52,28 +46,17 @@ class _NewRuleScreenState extends State<NewRuleScreen> {
   final classCtrl = TextEditingController();
   final descCtrl = TextEditingController();
 
-
-
-
-
-
   bool _validate() {
     final o = _formkey.currentState!.validate();
-if(!o){
- 
-  ScaffoldMessenger.of(context).clearSnackBars();
-   ScaffoldMessenger.of(context).
-  showSnackBar(
-    
-  const SnackBar(content: Text('Заполните все поля')),
-);
-   buzz();}
+    if (!o) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Заполните все поля')));
+      buzz();
+    }
     return o;
   }
-
-
-
-
 
   Future<void> buzz() async {
     if (await Vibration.hasVibrator() ?? false) {
@@ -100,11 +83,13 @@ if(!o){
     );
 
     await ruleProvider.addRule(newRule);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Добавлено!')));
   }
 
   @override
   Widget build(BuildContext context) {
-
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: bg,
@@ -177,7 +162,7 @@ if(!o){
                       FilledButton(
                         onPressed: () async {
                           if (!_validate()) return;
-                     
+
                           await _submit();
                           nameCtrl.clear();
                           classCtrl.clear();

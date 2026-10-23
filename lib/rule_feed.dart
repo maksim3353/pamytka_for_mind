@@ -25,7 +25,9 @@ class _RuleFeed extends State<RuleFeed> {
     });
   }
 
-  Future<bool> _confirmDialog(BuildContext context) async {
+
+
+  Future<bool> _ConfirmDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -67,11 +69,19 @@ class _RuleFeed extends State<RuleFeed> {
     return result ?? false;
   }
 
+
+
+
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
+
+
+
+
 
   Future<void> _load() async {
     await context.read<LocalRulesProvider>().load();
@@ -87,19 +97,19 @@ class _RuleFeed extends State<RuleFeed> {
     final parts = <String>[];
 
     try {
-      parts.add('${r.title}');
+      parts.add('${r.class_int}');
     } catch (_) {}
     try {
       parts.add('${r.description}');
     } catch (_) {}
     try {
-      parts.add('${r.text}');
+      parts.add('${r.subject}');
     } catch (_) {}
     try {
       parts.add('${r.name}');
     } catch (_) {}
     try {
-      parts.add('${r.content}');
+      parts.add('${r.rule_name}');
     } catch (_) {}
 
     return parts.join(' ').toLowerCase().contains(q);
@@ -202,8 +212,9 @@ class _RuleFeed extends State<RuleFeed> {
                           return RuleWidg(
                             Rule_model: filteredRules[index],
                             onTap: () async {
-                              print("asasadddddddddddddddd,${DateTime.now().microsecond}");
-                              final iss = await _confirmDialog(context);
+
+                         
+                              final iss = await _ConfirmDialog(context);
 
                               if (!iss) return;
 

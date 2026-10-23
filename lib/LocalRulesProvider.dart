@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -88,6 +90,43 @@ _safeNotify();
       _safeNotify();
     }
   }
+
+
+
+Future<void> DeleteAll() async {
+
+rules = [];
+await ListSave();
+_safeNotify();
+
+}
+
+
+
+
+
+Future<void> SaveFromList( NewJS) async{
+ final prefs = await SharedPreferences.getInstance();
+
+  final ss = await prefs.setString(_key, NewJS);
+  _safeNotify();
+  load();
+  
+
+}
+
+
+
+
+
+
+Future<String> GetJsonRules() async{
+ final prefs = await SharedPreferences.getInstance();
+
+ String GettedJS = await prefs.getString(_key).toString();
+  return GettedJS;
+}
+
 
 
 
